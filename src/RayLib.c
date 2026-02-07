@@ -15,15 +15,15 @@
 #include "raymath.h"
 #include <stdarg.h> //Infinit arguments, Infinit Power
 
-enum {
+enum Direction{
 	up,
 	down,
 	left,
 	right
-} direction;
+};
 
 
-Rectangle GetClosestRect(int amount, ..., Rectangle Player, direction direction);
+Rectangle GetClosestRect(Rectangle Player, enum Direction direction, int amount, ...);
 
 int main(void)
 {
@@ -37,9 +37,9 @@ int main(void)
 
 	Rectangle PlayerPosition = { 450, 500, 25, 25};
 
+	Rectangle Death = {-1000, 900, 3000, 10};
+
 	Rectangle startplatt = {50, 800,900, 25};
-
-
 	Rectangle obstacle1 = {700,700,100,100};
 	Rectangle obstacle2 = {300,700,100,100};
 
@@ -51,6 +51,9 @@ int main(void)
 	float gravity = 0.5f;
 	bool Nogravity = false;
 
+	bool debug = true;
+
+
 	// Game loop
 	while (!WindowShouldClose())
 	{
@@ -58,8 +61,9 @@ int main(void)
 		DrawFPS(50, 50);
 
 		DrawRectangle(startplatt.x,startplatt.y,startplatt.width,startplatt.height, BLACK);
-		DrawRectangle(obstacle1.x, obstacle1.y, obstacle1.width, obstacle1.height, RED);
-		DrawRectangle(obstacle2.x, obstacle2.y, obstacle2.width, obstacle2.height, RED);
+		DrawRectangle(obstacle1.x, obstacle1.y, obstacle1.width, obstacle1.height, BLUE);
+		DrawRectangle(obstacle2.x, obstacle2.y, obstacle2.width, obstacle2.height, BLUE);
+		DrawRectangle(Death.x, Death.y, Death.width, Death.height, BLUE);
 
 		if(IsKeyDown(KEY_D)){
 			if(velocityX < 5){
@@ -83,24 +87,38 @@ int main(void)
 
 
 
+		Nogravity = false;
 
-
-		if(CheckCollisionRecs(GetClosestRect(3, startplatt, obstacle1, obstacle2, PlayerPosition, up), PlayerPosition)){
+		if(CheckCollisionRecs(GetClosestRect(PlayerPosition, up, 3, startplatt, obstacle1, obstacle2), PlayerPosition)){
 			jump = 0;
 		}
-		if(CheckCollisionRecs(GetClosestRect(3, startplatt, obstacle1, obstacle2, PlayerPosition, right), PlayerPosition)){
+		if(CheckCollisionRecs(GetClosestRect(PlayerPosition, right, 3, startplatt, obstacle1, obstacle2), PlayerPosition)){
 			if(velocityX >0){
 				velocityX = 0;
 			}
 		}
-		if(CheckCollisionRecs(GetClosestRect(3, startplatt, obstacle1, obstacle2, PlayerPosition, down), PlayerPosition)){
-			Nogravity=True;
+		if(CheckCollisionRecs(GetClosestRect(PlayerPosition, down, 3, startplatt, obstacle1, obstacle2), PlayerPosition)){
+			Nogravity=true;
+			if(velocityY >=0){
+				velocityY = -0.000009f;
+			}
+
 		}
-		if(CheckCollisionRecs(GetClosestRect(3, startplatt, obstacle1, obstacle2, PlayerPosition, left), PlayerPosition)){
+		if(CheckCollisionRecs(GetClosestRect(PlayerPosition, left, 3, startplatt, obstacle1, obstacle2), PlayerPosition)){
 			if(velocityX < 0){
 				velocityX = 0;
 			}
 		}
+
+		if(debug){
+			//DrawRectangleLinesEx(GetClosestRect(PlayerPosition, left, 3, startplatt, obstacle1, obstacle2), 5, GRAY);
+			//DrawRectangleLinesEx(GetClosestRect(PlayerPosition, down, 3, startplatt, obstacle1, obstacle2), 5, GRAY);
+			//DrawRectangleLinesEx(GetClosestRect(PlayerPosition, right, 3, startplatt, obstacle1, obstacle2), 5, GRAY);
+			DrawRectangleLinesEx(GetClosestRect(PlayerPosition, up, 3, startplatt, obstacle1, obstacle2), 5, GRAY);
+
+
+		}
+
 
 		velocityX = velocityX - velocityX *0.1f;
 		jump = jump - jump * 0.1f;
@@ -114,6 +132,11 @@ int main(void)
 		}
 
 		PlayerPosition.x += velocityX;
+
+		if ((PlayerPosition.y + PlayerPosition.height) > Death.y){
+			PlayerPosition.x = 450;
+			PlayerPosition.y = 500;
+		}
 
 
 
@@ -129,7 +152,7 @@ int main(void)
 }
 
 
-Rectangle GetClosestRect(int amount, ..., Rectangle Player, direction direction){
+Rectangle GetClosestRect(Rectangle Player, enum Direction direction, int amount, ...){
 	va_list arguments;
 	va_start(arguments, amount);
 
@@ -138,9 +161,9 @@ Rectangle GetClosestRect(int amount, ..., Rectangle Player, direction direction)
 
 	bool firstargument = true;
 	bool under = false;
-	int mindis = 0;
+	float mindis = 0;
 	bool firstrun = true;
-
+	int failedHeightCheck = 0;
 
 	for(int i = 0; i < amount; ++i ){
 		parameter = va_arg(arguments, Rectangle);
@@ -149,33 +172,45 @@ Rectangle GetClosestRect(int amount, ..., Rectangle Player, direction direction)
 			firstargument = false;
 		}else{
 			if(direction == up){
-				if((Player.y - parameter.y + parameter.height) < (Player.y - closest.y + closest.height)){
-					for(int i = 0; i < Player.width; i++){
-						if(parameter.x < Player.x + i < (parameter.x + parameter.width)){
-							under = True;
-							break;
-						}
-					}
-					if(under){
-						closest = parameter;
-						under = false;
-					}
-				}
+			    if((Player.y - (parameter.y + parameter.height)) >= 0){
+			        for(int i = 0; i < Player.width; i++){
+			            if((parameter.x < Player.x + i) && (Player.x + i < (parameter.x + parameter.width))){
+			                under = true;
+			                break;
+			            }
+			        }
+			        if(under){
+			            if(firstrun){
+			                mindis = Player.y - (parameter.y + parameter.height);
+			                closest = parameter;
+			                firstrun = false;
+			            } else if((Player.y - (parameter.y + parameter.height)) < mindis){
+			                mindis = Player.y - (parameter.y + parameter.height);
+			                closest = parameter;
+			            }
+			            under = false;
+			        }
+			    } else {
+			        failedHeightCheck++;
+			    }
 			} else if (direction == right){
-				if(!(parameter.x - Player.x + Player.width) >= 0){
+				if((parameter.x - (Player.x + Player.width)) >= 0){
 					if(firstrun){
-						mindis = parameter.x - Player.x + Player.width;
+						mindis = parameter.x - (Player.x + Player.width);
+						closest = parameter;
+						firstrun = false;
 					}else{
-						if((parameter.x - Player.x + Player.width) < mindis){
-							mindis = parameter.x - Player.x + Player.width;
+						if((parameter.x - (Player.x + Player.width)) < mindis){
+							mindis = parameter.x - (Player.x + Player.width);
+							closest=parameter;
 						}
 					}
 				}
 			} else if (direction == down){
-				if((parameter.y - Player.y+ Player.height) < (closest.y - Player.y + Player.height)){
+				if(((parameter.y - (Player.y+ Player.height)) < (closest.y - (Player.y + Player.height))) >0){
 					for(int i = 0; i < Player.width; i++){
-						if(parameter.x < Player.x + i < (parameter.x + parameter.width)){
-							under = True;
+						if((parameter.x < Player.x + i) && ( Player.x + i < (parameter.x + parameter.width))){
+							under = true;
 							break;
 						}
 					}
@@ -185,17 +220,28 @@ Rectangle GetClosestRect(int amount, ..., Rectangle Player, direction direction)
 					}
 				}
 			} else if (direction == left){
-				if(!(Player.x - parameter.x + parameter.width) >= 0){
+				if((Player.x - (parameter.x + parameter.width)) >= 0){
 					if(firstrun){
-						mindis = Player.x - parameter.x + parameter.width;
+						mindis = Player.x - (parameter.x + parameter.width);
+						closest = parameter;
+						firstrun = false;
 					}else{
-						if((Player.x - parameter.x + parameter.width) < mindis){
-							mindis = Player.x - parameter.x + parameter.width;
+						if((Player.x - (parameter.x + parameter.width)) < mindis){
+							mindis = Player.x - (parameter.x + parameter.width);
+							closest = parameter;
 						}
 					}
 				}
 			}
 		}
+	}
+
+	DrawText(TextFormat("%d", failedHeightCheck), 50, 100, 20, RED);
+
+
+	if (failedHeightCheck == amount){
+		Rectangle Error = {0,0,0,0};
+		closest = Error;
 	}
 
 	va_end(arguments);
