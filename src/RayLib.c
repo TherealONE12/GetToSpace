@@ -28,7 +28,7 @@ float velocityY = 0;
 float jump = 0;
 float gravity = 0.5f;
 bool Nogravity = false;
-bool debug = true;
+bool debug = false;
 
 Rectangle Death = {-1000, 900, 3000, 10};
 Rectangle PlayerPosition = { 150, 500, 25, 25};
@@ -37,11 +37,25 @@ Rectangle PlayerPosition = { 150, 500, 25, 25};
 Rectangle GetClosestRect(Rectangle Player, enum Direction direction, int amount, ...);
 
 //Level Loops
+int MenuLoop(void);
 int Level1Loop(void);
 int Level2Loop(void);
 int Level3Loop(void);
 int Level4Loop(void);
 int Level5Loop(void);
+int Level6Loop(void);
+
+int CreditsLoop(void);
+
+
+
+Texture2D texture;
+Texture2D star;
+
+
+int frame = 0;
+float timer = 0.0f;
+
 
 int main(void)
 {
@@ -55,13 +69,25 @@ int main(void)
 
 
 
+	texture = LoadTexture("images/Vol1.png");
+	star = LoadTexture("images/Star.png");
 
-	int levelcnt = 5;
+
+
+
+
+	int levelcnt = 1;
 	// Game loop
 	while (!WindowShouldClose())
 	{
 		BeginDrawing();
+
+		DrawTexture(texture, 0, 0, WHITE);
+
 		switch (levelcnt) {
+		case 0:
+			levelcnt = MenuLoop();
+			break;
 		case 1:
 			if(Level1Loop() == 1){
 				levelcnt++;
@@ -92,7 +118,17 @@ int main(void)
 				ClearBackground(RAYWHITE);
 			}
 			break;
+		case 6:
+			if(Level6Loop() == 1){
+				levelcnt++;
+				ClearBackground(RAYWHITE);
+			}
+			break;
+		case 99:
+			levelcnt = CreditsLoop();
+			break;
 		default:
+			levelcnt = 0;
 			break;
 		}
 
@@ -102,23 +138,79 @@ int main(void)
 		EndDrawing();
 	}
 
+
+	UnloadTexture(texture);
+	UnloadTexture(star);
+
 	CloseWindow();
 
 	return 0;
 }
+int MenuLoop(void){
 
+	Rectangle PlayButton = {300, 500, 350, 200 };
+	Rectangle Credits = {300, 750, 350, 200 };
+
+	Vector2 MousePos;
+
+	bool clicked = false;
+
+	DrawText("GetToSpace!", 320, 200, 50, BLUE);
+	DrawText("A game by TheSkriptKid", 335, 260, 25, BLUE);
+
+	MousePos = GetMousePosition();
+	clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+
+	if(CheckCollisionPointRec(MousePos, PlayButton)){
+		DrawRectangleRounded(Credits, 0.3, 5, GRAY);
+		DrawRectangleRounded(PlayButton, 0.3, 5, GREEN);
+		DrawText("Play!", 420, 580, 50, BLUE);
+		DrawText("Credits", 390, 825, 50, BLUE);
+
+		if(clicked){
+			return 1;
+		}
+
+	} else if(CheckCollisionPointRec(MousePos, Credits)){
+		DrawRectangleRounded(Credits, 0.3, 5, GREEN);
+		DrawRectangleRounded(PlayButton, 0.3, 5, GRAY);
+		DrawText("Thanks!", 375, 825, 50, BLUE);
+		DrawText("Play?", 420, 580, 50, BLUE);
+
+		if(clicked){
+			return 99;
+		}
+
+	}else {
+		DrawRectangleRounded(PlayButton, 0.3, 5, GRAY);
+		DrawRectangleRounded(Credits, 0.3, 5, GRAY);
+
+		DrawText("Play?", 420, 580, 50, BLUE);
+		DrawText("Credits", 390, 825, 50, BLUE);
+	}
+
+
+
+
+
+	ClearBackground(LIGHTGRAY);
+
+	return 0;
+}
 
 int Level1Loop(void){
 	//Objekts
-	Rectangle startplatt = {50, 800,900, 25};
+	Rectangle startplatt = {50, 850,900, 25};
 	Rectangle Goal = {770, 750, 25,25};
 
 
 
-	DrawRectangle(startplatt.x,startplatt.y,startplatt.width,startplatt.height, BLACK);
+	DrawRectangleLines(startplatt.x,startplatt.y,startplatt.width,startplatt.height, BLACK);
 	DrawRectangle(Death.x, Death.y, Death.width, Death.height, RED);
 	DrawRectangleRec(Goal, GOLD);
 
+
+	DrawTexture(star, Goal.x - Goal.width, Goal.y-Goal.height, WHITE);
 
 
 	if(CheckCollisionRecs(PlayerPosition, Goal)){
@@ -131,7 +223,6 @@ int Level1Loop(void){
 
 		DrawText("Look at the Stars. Aren't they Beatiful? I wanna try to get to them!", 300, 700, 15 , GREEN);
 
-
 		if(IsKeyDown(KEY_D)){
 			velocityX = Clamp(velocityX + 1, -5, 5);
 		}else if(IsKeyDown(KEY_A)){
@@ -140,7 +231,7 @@ int Level1Loop(void){
 
 
 		if(IsKeyPressed(KEY_W) && Nogravity){
-			velocityY = -15;
+			velocityY = -25;
 		}
 
 		Nogravity = false;
@@ -184,25 +275,24 @@ int Level1Loop(void){
 		}
 
 		DrawRectangleGradientEx(PlayerPosition, GREEN, BLUE, PURPLE, GRAY);
-
-		ClearBackground(RAYWHITE);
 	}
 	return -1;
 }
 
 int Level2Loop(void){
 	//Objekts
-	Rectangle startplatt = {50, 800,300, 25};
-	Rectangle startplatt2 = {450, 800,400, 25};
+	Rectangle startplatt = {50, 850,300, 25};
+	Rectangle startplatt2 = {500, 850,400, 25};
 	Rectangle Goal = {770, 750, 25,25};
 
 
 
-	DrawRectangle(startplatt.x,startplatt.y,startplatt.width,startplatt.height, BLACK);
-	DrawRectangle(startplatt2.x,startplatt2.y,startplatt2.width,startplatt2.height, BLACK);
+	DrawRectangleLines(startplatt.x,startplatt.y,startplatt.width,startplatt.height, BLACK);
+	DrawRectangleLines(startplatt2.x,startplatt2.y,startplatt2.width,startplatt2.height, BLACK);
 	DrawRectangle(Death.x, Death.y, Death.width, Death.height, RED);
 	DrawRectangleRec(Goal, GOLD);
 
+	DrawTexture(star, Goal.x - Goal.width, Goal.y-Goal.height, WHITE);
 
 
 	if(CheckCollisionRecs(PlayerPosition, Goal)){
@@ -224,7 +314,7 @@ int Level2Loop(void){
 
 
 		if(IsKeyPressed(KEY_W) && Nogravity){
-			velocityY = -20;
+			velocityY = -25;
 		}
 
 		Nogravity = false;
@@ -284,16 +374,18 @@ int Level3Loop(void){
 
 
 	//Objekts
-	Rectangle startplatt = {50, 800,900, 25};
-	Rectangle obstacle1 = {700,700,100,100};
-	Rectangle obstacle2 = {300,700,100,100};
+	Rectangle startplatt = {50, 850,900, 25};
+	Rectangle obstacle1 = {700,750,100,100};
+	Rectangle obstacle2 = {300,750,100,100};
 	Rectangle Goal = {770, 650, 25,25};
 
-	DrawRectangle(startplatt.x,startplatt.y,startplatt.width,startplatt.height, BLACK);
+	DrawRectangleLines(startplatt.x,startplatt.y,startplatt.width,startplatt.height, BLACK);
 	DrawRectangle(obstacle1.x, obstacle1.y, obstacle1.width, obstacle1.height, BLUE);
 	DrawRectangle(obstacle2.x, obstacle2.y, obstacle2.width, obstacle2.height, BLUE);
 	DrawRectangle(Death.x, Death.y, Death.width, Death.height, RED);
 	DrawRectangleRec(Goal, GOLD);
+
+	DrawTexture(star, Goal.x - Goal.width, Goal.y-Goal.height, WHITE);
 
 	if(CheckCollisionRecs(PlayerPosition, Goal)){
 		PlayerPosition.x = 50;
@@ -314,7 +406,7 @@ int Level3Loop(void){
 
 
 		if(IsKeyPressed(KEY_W) && Nogravity){
-			velocityY = -15;
+			velocityY = -20;
 		}
 
 
@@ -387,28 +479,27 @@ int Level3Loop(void){
 
 int Level4Loop(void){
 	//Objekts
-	Rectangle startplatt = {50, 800,100, 25};
+	Rectangle startplatt = {75, 850,100, 25};
 	Rectangle jump1 = {200, 750, 100 ,25};
-	Rectangle jump2 = {350, 700, 60 ,25};
-	Rectangle jump3= {450, 650, 40 ,25};
-	Rectangle jump4 = {550, 700, 100 ,25};
-	Rectangle jump5 = {750, 800, 100 ,25};
-	Rectangle Goal = {770, 750, 25,25};
+	Rectangle jump2 = {350, 650, 60 ,25};
+	Rectangle jump3= {450, 550, 40 ,25};
+	Rectangle jump5 = {750, 750, 100 ,25};
+	Rectangle Goal = {770, 700, 25,25};
 
 
-	DrawRectangle(startplatt.x,startplatt.y,startplatt.width,startplatt.height, BLACK);
+	DrawRectangleLines(startplatt.x,startplatt.y,startplatt.width,startplatt.height, BLACK);
 	DrawRectangle(Death.x, Death.y, Death.width, Death.height, RED);
 
 	DrawRectangleRec(jump1, BLACK);
 	DrawRectangleRec(jump2, BLACK);
 	DrawRectangleRec(jump3, BLACK);
-	DrawRectangleRec(jump4, BLACK);
 	DrawRectangleRec(jump5, BLACK);
 
 
 	DrawRectangleRec(Goal, GOLD);
 
 
+	DrawTexture(star, Goal.x - Goal.width, Goal.y-Goal.height, WHITE);
 
 
 	if(CheckCollisionRecs(PlayerPosition, Goal)){
@@ -430,7 +521,7 @@ int Level4Loop(void){
 
 
 		if(IsKeyPressed(KEY_W) && Nogravity){
-			velocityY = -15;
+			velocityY = -25;
 		}
 
 
@@ -453,11 +544,6 @@ int Level4Loop(void){
 				velocityY = 0;
 			}
 		} else if(CheckCollisionRecs(jump3, PlayerPosition)){
-			Nogravity = true;
-			if(velocityY > 0){
-				velocityY = 0;
-			}
-		} else if(CheckCollisionRecs(jump4, PlayerPosition)){
 			Nogravity = true;
 			if(velocityY > 0){
 				velocityY = 0;
@@ -511,18 +597,17 @@ int Level4Loop(void){
 int Level5Loop(void){
 
 	//Objekts
-	Rectangle startplatt = {50, 800,900, 25};
-	Rectangle Death2 = {450, 775, 25,20};
+	Rectangle startplatt = {50, 850,900, 25};
+	Rectangle Death2 = {450, 775, 35,75};
 	Rectangle Goal = {770, 750, 25,25};
 
 
 
-	DrawRectangle(startplatt.x,startplatt.y,startplatt.width,startplatt.height, BLACK);
-	DrawRectangle(Death.x, Death.y, Death.width, Death.height, RED);
+	DrawRectangleLines(startplatt.x,startplatt.y,startplatt.width,startplatt.height, BLACK);
 	DrawRectangleRec(Death2, RED);
 	DrawRectangleRec(Goal, GOLD);
 
-
+	DrawTexture(star, Goal.x - Goal.width, Goal.y-Goal.height, WHITE);
 
 	if(CheckCollisionRecs(PlayerPosition, Goal)){
 		PlayerPosition.x = 150;
@@ -543,7 +628,7 @@ int Level5Loop(void){
 
 
 		if(IsKeyPressed(KEY_W) && Nogravity){
-			velocityY = -15;
+			velocityY = -25;
 		}
 
 
@@ -584,7 +669,7 @@ int Level5Loop(void){
 
 
 		if ((PlayerPosition.y + PlayerPosition.height) > Death.y){ //Death
-			PlayerPosition.x = 450;
+			PlayerPosition.x = 150;
 			PlayerPosition.y = 500;
 		}else if(CheckCollisionRecs(Death2, PlayerPosition)){
 			PlayerPosition.x = 150;
@@ -596,6 +681,136 @@ int Level5Loop(void){
 		ClearBackground(RAYWHITE);
 	}
 	return -1;
+}
+
+int Level6Loop(void){
+
+	//Objekts
+	Rectangle startplatt = {50, 850,300, 25};
+	Rectangle boost = {350, 550, 25, 300};
+	Rectangle boost2 = {550, 550, 25, 300};
+	Rectangle Goal = {770, 750, 25,25};
+
+
+
+	DrawRectangleLines(startplatt.x,startplatt.y,startplatt.width,startplatt.height, BLACK);
+	DrawRectangleRec(boost, BLUE);
+	DrawRectangleRec(boost2, BLUE);
+	DrawRectangleRec(Goal, GOLD);
+
+	DrawTexture(star, Goal.x - Goal.width, Goal.y-Goal.height, WHITE);
+
+	if(CheckCollisionRecs(PlayerPosition, Goal)){
+		PlayerPosition.x = 150;
+		PlayerPosition.y = 500;
+		return 1;
+	} else{
+		DrawFPS(50, 50);
+
+
+		DrawText("Are you prepared?", 300, 700, 15 , GREEN);
+
+
+		if(IsKeyDown(KEY_D)){
+			velocityX = Clamp(velocityX + 1, -5, 5);
+		}else if(IsKeyDown(KEY_A)){
+			velocityX = Clamp(velocityX - 1, -5, 5);
+		}
+
+
+		if(IsKeyPressed(KEY_W) && Nogravity){
+			velocityY = -25;
+		}
+
+
+		Nogravity = false;
+
+		if(CheckCollisionRecs(startplatt, PlayerPosition)){
+			Nogravity = true;
+			if(velocityY > 0){
+				velocityY = 0;
+			}
+		} else if(CheckCollisionRecs(GetClosestRect(PlayerPosition, down, 4, startplatt, boost, Goal, boost2),PlayerPosition)){
+			Nogravity = true;
+		}else if(CheckCollisionRecs(GetClosestRect(PlayerPosition, down, 4, startplatt, boost, Goal, boost2),PlayerPosition)){
+			Nogravity = true;
+		}
+
+
+
+		velocityX = velocityX - velocityX *0.1f;
+		if(!IsKeyDown(KEY_W)){
+			jump = jump - (jump * 0.1f);
+		}
+
+
+		if(Nogravity){
+			velocityY = velocityY - velocityY *0.1f;
+			PlayerPosition.y += velocityY + jump;
+		}else{
+			velocityY = velocityY - velocityY *0.1f + gravity;
+			PlayerPosition.y += velocityY;
+		}
+
+		PlayerPosition.x += velocityX;
+
+
+		// Movement
+		velocityX *= 0.9f;
+		if(!Nogravity){
+			velocityY += gravity;
+		}
+		velocityY *= 0.98f;
+
+
+		if ((PlayerPosition.y + PlayerPosition.height) > Death.y){ //Death
+			PlayerPosition.x = 150;
+			PlayerPosition.y = 500;
+		}
+
+		DrawRectangleGradientEx(PlayerPosition, GREEN, BLUE, PURPLE, GRAY);
+
+		ClearBackground(RAYWHITE);
+	}
+	return -1;
+}
+
+
+
+int CreditsLoop(void){
+	Rectangle Back = {370, 750, 200, 100};
+
+	Vector2 MousePos;
+	bool clicked = false;
+
+	MousePos = GetMousePosition();
+	clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+
+	DrawText("Thanks to:", 320, 100, 50, GREEN);
+
+	DrawText("RayLib for the Amazing work!", 300, 250, 25, BLUE);
+	DrawText("HackClub for giving Motivation!", 300, 300, 25, BLUE);
+	DrawText("Claude and Github Copilot!", 300, 350, 25, BLUE);
+	DrawText("and ...", 400, 390, 40, RED);
+	DrawText("Thank YOU for Playing!!!", 300, 450, 25, PURPLE);
+
+	DrawRectangleRounded(Back, 0.3, 10, YELLOW);
+	DrawText("Back", 440, 790, 25, BLUE);
+
+
+	if(CheckCollisionPointRec(MousePos, Back)){
+		DrawRectangleRounded(Back, 0.3, 10, YELLOW);
+		DrawText("Back", 440, 790, 25, BLUE);
+		if(clicked){
+			return 0;
+		}
+	}else{
+		DrawRectangleRounded(Back, 0.3, 10, PURPLE);
+		DrawText("Back", 440, 790, 25, BLUE);
+	}
+
+	ClearBackground(GRAY);
+	return 99;
 }
 
 
