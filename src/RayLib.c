@@ -63,7 +63,7 @@ Texture2D star;
 
 
 float timer = 900.0f;
-int timer_0 = 0.0f;
+int timer_0 = 0;
 bool done_0 = true;
 bool firstrungame = true;
 int nextlvl = -1;
@@ -118,7 +118,7 @@ int main(void)
 		fflush(file);
 	}
 
-	if(file !=0){
+	if(file != NULL){
 		fseek(file, 0, SEEK_SET);
 		fscanf(file, "WARNING: EDITING THIS FILE MAY CURROPT YOUR GAME!\n%i", &nextlvl);
 		nextlvl = nextlvl/298;
@@ -151,7 +151,7 @@ int main(void)
 				PlayerPosition.y = 500;
 				freopen(filepath, "w", file);
 				freopen(filepath, "a+", file);
-				if(file !=0){
+				if(file != NULL){
 					fseek(file, 0, SEEK_SET);
 					fprintf(file, "WARNING: EDITING THIS FILE MAY CURROPT YOUR GAME!\n%i", levelcnt * 298);
 					fflush(file);
@@ -168,7 +168,7 @@ int main(void)
 				PlayerPosition.y = 500;
 				freopen(filepath, "w", file);
 				freopen(filepath, "a+", file);
-				if(file !=0){
+				if(file != NULL){
 					fseek(file, 0, SEEK_SET);
 					fprintf(file, "WARNING: EDITING THIS FILE MAY CURROPT YOUR GAME!\n%i", levelcnt * 298);
 					fflush(file);
@@ -183,7 +183,7 @@ int main(void)
 				ClearBackground(RAYWHITE);
 				freopen(filepath, "w", file);
 				freopen(filepath, "a+", file);
-				if(file !=0){
+				if(file != NULL){
 					fseek(file, 0, SEEK_SET);
 					fprintf(file, "WARNING: EDITING THIS FILE MAY CURROPT YOUR GAME!\n%i", levelcnt * 298);
 					fflush(file);
@@ -198,7 +198,7 @@ int main(void)
 				ClearBackground(RAYWHITE);
 				freopen(filepath, "w", file);
 				freopen(filepath, "a+", file);
-				if(file !=0){
+				if(file != NULL){
 					fseek(file, 0, SEEK_SET);
 					fprintf(file, "WARNING: EDITING THIS FILE MAY CURROPT YOUR GAME!\n%i", levelcnt * 298);
 					fflush(file);
@@ -213,7 +213,7 @@ int main(void)
 				ClearBackground(RAYWHITE);
 				freopen(filepath, "w", file);
 				freopen(filepath, "a+", file);
-				if(file !=0){
+				if(file != NULL){
 					fseek(file, 0, SEEK_SET);
 					fprintf(file, "WARNING: EDITING THIS FILE MAY CURROPT YOUR GAME!\n%i", levelcnt * 298);
 					fflush(file);
@@ -228,7 +228,7 @@ int main(void)
 				ClearBackground(RAYWHITE);
 				freopen(filepath, "w", file);
 				freopen(filepath, "a+", file);
-				if(file !=0){
+				if(file != NULL){
 					fseek(file, 0, SEEK_SET);
 					fprintf(file, "WARNING: EDITING THIS FILE MAY CURROPT YOUR GAME!\n%i", levelcnt * 298);
 					fflush(file);
@@ -243,7 +243,7 @@ int main(void)
 				ClearBackground(RAYWHITE);
 				freopen(filepath, "w", file);
 				freopen(filepath, "a+", file);
-				if(file !=0){
+				if(file != NULL){
 					fseek(file, 0, SEEK_SET);
 					fprintf(file, "WARNING: EDITING THIS FILE MAY CURROPT YOUR GAME!\n%i", levelcnt * 298);
 					fflush(file);
@@ -258,7 +258,7 @@ int main(void)
 				ClearBackground(RAYWHITE);
 				freopen(filepath, "w", file);
 				freopen(filepath, "a+", file);
-				if(file !=0){
+				if(file != NULL){
 					fseek(file, 0, SEEK_SET);
 					fprintf(file, "WARNING: EDITING THIS FILE MAY CURROPT YOUR GAME!\n%i", levelcnt * 298);
 					fflush(file);
@@ -273,7 +273,7 @@ int main(void)
 				ClearBackground(RAYWHITE);
 				freopen(filepath, "w", file);
 				freopen(filepath, "a+", file);
-				if(file !=0){
+				if(file != NULL){
 					fseek(file, 0, SEEK_SET);
 					fprintf(file, "WARNING: EDITING THIS FILE MAY CURROPT YOUR GAME!\n%i", levelcnt * 298);
 					fflush(file);
