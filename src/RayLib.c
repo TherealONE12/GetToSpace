@@ -53,6 +53,7 @@ int Level4Loop(void);
 int Level5Loop(void);
 int Level6Loop(void);
 
+int LevelSelectorLoop(void);
 int CreditsLoop(void);
 
 
@@ -62,7 +63,7 @@ Texture2D star;
 
 
 
-float timer = 900.0f;
+float timer = 0.0f;
 int timer_0 = 0;
 bool done_0 = true;
 bool firstrungame = true;
@@ -282,6 +283,9 @@ int main(void)
 				}
 			}
 			break;
+		case 97:
+			levelcnt = LevelSelectorLoop();
+			break;
 		case 99:
 			levelcnt = CreditsLoop();
 			break;
@@ -306,55 +310,44 @@ int main(void)
 	return 0;
 }
 int MenuLoop(void){
+    Rectangle PlayButton   = { 300, 450, 350, 150 };
+    Rectangle LevelSelect  = { 300, 625, 350, 150 };
+    Rectangle CreditsBtn   = { 300, 800, 350, 150 };
 
-	Rectangle PlayButton = {300, 500, 350, 200 };
-	Rectangle Credits = {300, 750, 350, 200 };
+    Vector2 MousePos = GetMousePosition();
+    bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
 
-	Vector2 MousePos;
+    ClearBackground(LIGHTGRAY);
 
-	bool clicked = false;
-
-	DrawText("GetToSpace!", 320, 200, 50, BLUE);
-	DrawText("A game by TheSkriptKid", 335, 260, 25, BLUE);
-
-	MousePos = GetMousePosition();
-	clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
-
-	if(CheckCollisionPointRec(MousePos, PlayButton)){
-		DrawRectangleRounded(Credits, 0.3, 5, GRAY);
-		DrawRectangleRounded(PlayButton, 0.3, 5, GREEN);
-		DrawText("Play!", 420, 580, 50, BLUE);
-		DrawText("Credits", 390, 825, 50, BLUE);
-
-		if(clicked){
-			return nextlvl;
-		}
-
-	} else if(CheckCollisionPointRec(MousePos, Credits)){
-		DrawRectangleRounded(Credits, 0.3, 5, GREEN);
-		DrawRectangleRounded(PlayButton, 0.3, 5, GRAY);
-		DrawText("Thanks!", 375, 825, 50, BLUE);
-		DrawText("Play?", 420, 580, 50, BLUE);
-
-		if(clicked){
-			return 99;
-		}
-
-	}else {
-		DrawRectangleRounded(PlayButton, 0.3, 5, GRAY);
-		DrawRectangleRounded(Credits, 0.3, 5, GRAY);
-
-		DrawText("Play?", 420, 580, 50, BLUE);
-		DrawText("Credits", 390, 825, 50, BLUE);
-	}
+    DrawText("GetToSpace!", 320, 150, 60, BLUE);
+    DrawText("A game by TheSkriptKid", 335, 225, 25, BLUE);
 
 
+    bool hPlay   = CheckCollisionPointRec(MousePos, PlayButton);
+    bool hSelect = CheckCollisionPointRec(MousePos, LevelSelect);
+    bool hCred   = CheckCollisionPointRec(MousePos, CreditsBtn);
+
+    DrawRectangleRounded(PlayButton,  0.3f, 8, hPlay   ? GREEN  : GRAY);
+    DrawRectangleRounded(LevelSelect, 0.3f, 8, hSelect ? YELLOW : GRAY);
+    DrawRectangleRounded(CreditsBtn,  0.3f, 8, hCred   ? GREEN  : GRAY);
+
+    DrawText(hPlay   ? "Let's Go!"  : "Play!",    390, 510, 40, BLUE);
+    DrawText(hSelect ? "Pick one!"  : "Levels",   390, 685, 40, BLUE);
+    DrawText(hCred   ? "Thanks! :)" : "Credits",  385, 860, 40, BLUE);
 
 
+    if(nextlvl <= 0){
+        DrawRectangleRounded(LevelSelect, 0.3f, 8, Fade(GRAY, 0.4f));
+        DrawText("Levels", 390, 685, 40, Fade(BLUE, 0.3f));
+    }
 
-	ClearBackground(LIGHTGRAY);
+    if(clicked){
+        if(hPlay)                        return nextlvl;
+        if(hSelect && nextlvl > 0)       return 97;
+        if(hCred)                        return 99;
+    }
 
-	return 98;
+    return 98;
 }
 
 int Level0Loop(void){
@@ -1258,6 +1251,95 @@ int CreditsLoop(void){
 
 	ClearBackground(GRAY);
 	return 99;
+}
+
+int LevelSelectorLoop(void){
+
+    const char *levelNames[] = {
+        "Intro",     // 0
+        "Level 1",   // 1
+        "Level 1-2", // 2
+        "Level 2",   // 3
+        "Level 2-2", // 4
+        "Level 3",   // 5
+        "Level 4",   // 6
+        "Level 5",   // 7
+        "Level 6",   // 8
+    };
+    int totalLevels = 9;
+
+    Rectangle backBtn = { 20, 20, 120, 45 };
+    Vector2 mousePos = GetMousePosition();
+    bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+
+    ClearBackground(DARKGRAY);
+    DrawText("Select Level", 350, 40, 40, WHITE);
+
+
+    Color backColor = CheckCollisionPointRec(mousePos, backBtn) ? YELLOW : GRAY;
+    DrawRectangleRounded(backBtn, 0.3f, 8, backColor);
+    DrawText("< Menu", 30, 32, 20, BLACK);
+    if (CheckCollisionPointRec(mousePos, backBtn) && clicked) {
+        return 98;
+    }
+
+
+    int cols = 3;
+    int btnW = 240, btnH = 80;
+    int padX = 60, padY = 30;
+    int startX = 100, startY = 150;
+
+    for (int i = 0; i < totalLevels; i++) {
+        int col = i % cols;
+        int row = i / cols;
+
+        Rectangle btn = {
+            startX + col * (btnW + padX),
+            startY + row * (btnH + padY),
+            btnW,
+            btnH
+        };
+
+        bool unlocked = (i <= nextlvl);
+        bool hover    = CheckCollisionPointRec(mousePos, btn);
+
+        Color bgColor;
+        if (!unlocked)        bgColor = Fade(GRAY, 0.4f);
+        else if (hover)       bgColor = GREEN;
+        else                  bgColor = DARKGREEN;
+
+        DrawRectangleRounded(btn, 0.25f, 8, bgColor);
+        DrawRectangleRoundedLines(btn, 0.25f, 8, BLACK);
+
+
+        if (i < nextlvl) {
+            DrawText("*", btn.x + btnW - 22, btn.y + 6, 25, GOLD);
+        }
+
+        if (unlocked) {
+            DrawText(levelNames[i],
+                     btn.x + 20,
+                     btn.y + btnH/2 - 12,
+                     22, WHITE);
+
+            if (hover && clicked) {
+
+                PlayerPosition.x = 150;
+                PlayerPosition.y = 500;
+                velocityX = 0;
+                velocityY = 0;
+                return i;
+            }
+        } else {
+
+            DrawText("LOCKED",
+                     btn.x + 60,
+                     btn.y + btnH/2 - 12,
+                     22, Fade(WHITE, 0.4f));
+        }
+    }
+
+    return 97;
 }
 
 
