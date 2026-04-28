@@ -97,6 +97,15 @@ MIT
 
 ---
 
+
+##  AI Usage
+
+Used claude to get it pushed to github, as there were some minor complications
+Used ChatGPT For pictures
+Used Copilot for debugging and Finding the Funktions in Raylib (used as google)
+
+---
+
 ##  Credits
 
 - [raylib](https://www.raylib.com/) — the fantastic C game library powering this project
